@@ -52,11 +52,12 @@ const formatParagraph = async (str, fontSize, maxWidth) => {
  * 格式化每页
  * @param paragraphs
  * @param fontSize
+ * @param chapterFontSize
  * @param maxHeight
  * @param lineHeight
  * @param paragraphHeight
  */
-const formatPage = (paragraphs, fontSize, maxHeight, lineHeight, paragraphHeight) => {
+const formatPage = (paragraphs, fontSize, chapterFontSize, maxHeight, lineHeight, paragraphHeight) => {
 
 	let pages = [];
 	let lines = 0;
@@ -64,19 +65,29 @@ const formatPage = (paragraphs, fontSize, maxHeight, lineHeight, paragraphHeight
 	while (cursor < paragraphs.length) {
 		let paragraph = paragraphs[cursor];
 		lines += paragraph.text.length;
-		const tspanY = getTspanY(lines, fontSize, lineHeight, paragraphHeight, cursor);
+		const tspanY = getTspanY(lines, fontSize, chapterFontSize, lineHeight, paragraphHeight, cursor, pages.length === 0);
 		if (tspanY >= maxHeight) {
 			//这时做段落的拆分 因为这个段落
 			//先回退到上一个paragraph的状态
 			lines = lines - paragraph.text.length;
 			let splitFlag = false;
-			for (let i = 1; i < paragraph.text.length + 1; i++) {
-				if (getTspanY(lines + i, fontSize, lineHeight, paragraphHeight, cursor) >= maxHeight) {
-					let frontParagraph = {...paragraph, text: paragraph.text.slice(0, i - 2)}
-					let behindParagraph = {...paragraph, text: paragraph.text.slice(i - 2, paragraph.text.length)}
-					paragraphs.splice(cursor, 1, frontParagraph, behindParagraph)
-					splitFlag = true;
-					break
+			//有至少2行
+			if (paragraph.text.length >= 2) {
+				for (let i = 1; i <= paragraph.text.length; i++) {
+					const tspanY1 = getTspanY(lines + i, fontSize, chapterFontSize, lineHeight, paragraphHeight, cursor, pages.length === 0);
+					const pass = tspanY1 >= maxHeight;
+					//这种情况说明第一行就已经放不下了
+					if (i === 1 && pass) {
+						break
+					}
+					//下面i都大于1
+					if (pass) {
+						let frontParagraph = {...paragraph, text: paragraph.text.slice(0, i - 1)}
+						let behindParagraph = {...paragraph, text: paragraph.text.slice(i - 1, paragraph.text.length)}
+						paragraphs.splice(cursor, 1, frontParagraph, behindParagraph)
+						splitFlag = true;
+						break
+					}
 				}
 			}
 			if (splitFlag) {
@@ -93,17 +104,25 @@ const formatPage = (paragraphs, fontSize, maxHeight, lineHeight, paragraphHeight
 		}
 	}
 	pages.push(paragraphs.slice(0, cursor))
+	console.log(JSON.stringify(pages))
 	return pages
 }
 
 //获取每行的y值
-const getTspanY = (preLines, fontSize, lineHeight, paragraphHeight, tsArrIndex) => {
-	return preLines * fontSize + (preLines - 1) * lineHeight + paragraphHeight * tsArrIndex
+const getTspanY = (preLines, fontSize, chapterFontSize, lineHeight, paragraphHeight, tsArrIndex, hasChapter) => {
+	let allFontSize = 0
+	if (hasChapter) {
+		allFontSize = fontSize * (preLines - 1) + chapterFontSize
+	} else {
+		allFontSize = preLines * fontSize
+	}
+	return allFontSize + (preLines - 1) * lineHeight + paragraphHeight * tsArrIndex
 }
 
 const NovelContainer = ({
 							texts = [],
 							fontSize = 14,
+							chapterFontSize = 14,
 							lineHeight = 10,
 							paragraphHeight = 10,
 							fontColor = '#000000',
@@ -124,7 +143,7 @@ const NovelContainer = ({
 				texts[index].text = await formatParagraph(item.text, fontSize, width)
 				//由于是多线程 现在检测是否还有为null的数据 没有的话表示格式化完成
 				if (texts.find((item) => typeof item.text === 'string') === undefined) {
-					setPages(formatPage(texts, fontSize, height, lineHeight, paragraphHeight))
+					setPages(formatPage(texts, fontSize, chapterFontSize, height, lineHeight, paragraphHeight))
 					setLoading(false)
 					console.log(`耗时 ： ${Date.now() - startTime}`)
 				}
@@ -162,14 +181,14 @@ const NovelContainer = ({
 										<Text
 											key={tsArrIndex}
 											fill={fontColor}
-											fontSize={fontSize}>
+											fontSize={tsArr.name === 'chapter' ? chapterFontSize : fontSize}>
 											{
 												tsArr?.text?.map((ts, tsIndex) => {
 													preLines++
 													return (
 														<TSpan
 															key={tsIndex}
-															y={getTspanY(preLines, fontSize, lineHeight, paragraphHeight, tsArrIndex)}
+															y={getTspanY(preLines, fontSize, chapterFontSize, lineHeight, paragraphHeight, tsArrIndex, pageIndex === 0)}
 															x={0}>
 															{ts}
 														</TSpan>

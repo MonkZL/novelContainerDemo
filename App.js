@@ -272,14 +272,21 @@ const App = () => {
 	}]
 	const width = Dimensions.get('window').width;
 	const height = Dimensions.get('window').height;
-	return (
-		<SafeAreaView>
 
-			<View style={{width, height}}>
-				<NovelContainer texts={texts.slice(0, texts.length)} fontSize={20}/>
+	let title = {"name": "chapter", "id": ["-1"], text: "Chapter 1"};
+
+	texts.splice(0, 0, title)
+
+	return (
+		<View style={StyleSheet.absoluteFill}>
+
+			<View style={StyleSheet.absoluteFill}>
+				<NovelContainer texts={texts.slice(0, texts.length)} fontSize={20} chapterFontSize={36}/>
 			</View>
 
-		</SafeAreaView>
+			{/*<View style={{width: 10, height: 720, backgroundColor: 'red', top: 0, position: 'absolute'}}/>*/}
+
+		</View>
 	);
 }
 
