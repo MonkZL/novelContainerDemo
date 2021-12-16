@@ -23,8 +23,9 @@ const formatParagraph = async (str, fontSize, maxWidth) => {
 			returnArr.push(strArr.slice(0, cursor - 1).join(' '))
 			strArr = strArr.slice(cursor - 1, strArr.length)
 			cursor = 0;
+		} else {
+			cursor++;
 		}
-		cursor++;
 	}
 	returnArr.push(strArr.slice(0, cursor).join(' '))
 	return returnArr
@@ -39,21 +40,40 @@ const formatParagraph = async (str, fontSize, maxWidth) => {
  * @param paragraphHeight
  */
 const formatPage = (paragraphs, fontSize, maxHeight, lineHeight, paragraphHeight) => {
+
 	let pages = [];
 	let lines = 0;
 	let cursor = 0;
 	while (cursor < paragraphs.length) {
 		let paragraph = paragraphs[cursor];
-		console.log(JSON.stringify(paragraph.text))
 		lines += paragraph.text.length;
 		const tspanY = getTspanY(lines, fontSize, lineHeight, paragraphHeight, cursor);
-		if (tspanY > maxHeight) {
-			pages.push(paragraphs.slice(0, cursor - 1))
-			paragraphs = paragraphs.slice(cursor - 1, paragraphs.length)
+		if (tspanY >= maxHeight) {
+			//这时做段落的拆分 因为这个段落
+			//先回退到上一个paragraph的状态
+			lines = lines - paragraph.text.length;
+			let splitFlag = false;
+			for (let i = 1; i < paragraph.text.length + 1; i++) {
+				if (getTspanY(lines + i, fontSize, lineHeight, paragraphHeight, cursor) >= maxHeight) {
+					let frontParagraph = {...paragraph, text: paragraph.text.slice(0, i - 2)}
+					let behindParagraph = {...paragraph, text: paragraph.text.slice(i - 2, paragraph.text.length)}
+					paragraphs.splice(cursor, 1, frontParagraph, behindParagraph)
+					splitFlag = true;
+					break
+				}
+			}
+			if (splitFlag) {
+				pages.push(paragraphs.slice(0, cursor + 1))
+				paragraphs = paragraphs.slice(cursor + 1, paragraphs.length)
+			} else {
+				pages.push(paragraphs.slice(0, cursor))
+				paragraphs = paragraphs.slice(cursor, paragraphs.length)
+			}
 			cursor = 0;
 			lines = 0;
+		} else {
+			cursor++;
 		}
-		cursor++;
 	}
 	pages.push(paragraphs.slice(0, cursor))
 	return pages
@@ -75,6 +95,7 @@ const NovelContainer = ({
 
 	const width = Dimensions.get('window').width;
 	const height = Dimensions.get('window').height;
+
 	const [pages, setPages] = useState([]);
 
 	useEffect(() => {
@@ -83,7 +104,7 @@ const NovelContainer = ({
 			texts[index].text = await formatParagraph(item.text, fontSize, width)
 			//由于是多线程 现在检测是否还有为null的数据 没有的话表示格式化完成
 			if (texts.find((item) => typeof item.text === 'string') === undefined) {
-				setPages(formatPage(texts))
+				setPages(formatPage(texts, fontSize, height, lineHeight, paragraphHeight))
 				console.log(`耗时 ： ${Date.now() - startTime}`)
 			}
 		})
@@ -98,7 +119,7 @@ const NovelContainer = ({
 			width={width}
 			style={{backgroundColor}}>
 			{
-				pages[0]?.map((tsArr, tsArrIndex) => {
+				pages[1]?.map((tsArr, tsArrIndex) => {
 					return (
 						<Text
 							key={tsArrIndex}

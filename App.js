@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import {Dimensions, SafeAreaView, View} from 'react-native';
+import {Dimensions, SafeAreaView, View, StyleSheet} from 'react-native';
 import NovelContainer from "./NovelContainer";
 
 /*
@@ -274,9 +274,11 @@ const App = () => {
 	const height = Dimensions.get('window').height;
 	return (
 		<SafeAreaView>
+
 			<View style={{width, height}}>
-				<NovelContainer texts={texts.slice(0, texts.length)} fontSize={20}/>
+				<NovelContainer texts={texts.slice(0, texts.length)} fontSize={20} backgroundColor={'green'}/>
 			</View>
+
 		</SafeAreaView>
 	);
 }
