@@ -21,16 +21,19 @@ public class TextSizeUtil extends ReactContextBaseJavaModule {
 
 	private static ReactApplicationContext reactContext;
 
+	private final Paint paint;
+	private final Rect rect;
+
 	public TextSizeUtil(ReactApplicationContext context) {
 		super(context);
 		reactContext = context;
+		paint = new Paint();
+		rect = new Rect();
 	}
 
 	@ReactMethod
 	public void getTextWidth(String str, Float textSize, Integer start, Integer end, Promise promise) {
-		Paint paint = new Paint();
 		paint.setTextSize(textSize);
-		Rect rect = new Rect();
 		paint.getTextBounds(str, start, end, rect);
 		promise.resolve(rect.width());
 	}
