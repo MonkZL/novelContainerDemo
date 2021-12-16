@@ -168,7 +168,7 @@ const NovelContainer = ({
 	const [pages, setPages] = useState([]);
 	const [isLoading, setLoading] = useState(true);
 
-
+	//TODO 支持再次添加 chapter 在后台静默格式化
 	useEffect(() => {
 		if (width > 0 && height > 0) {
 			console.log('开始格式化')
@@ -183,7 +183,7 @@ const NovelContainer = ({
 				}
 			})
 		}
-	}, [width, height, fontSize])
+	}, [width, height, fontSize, texts])
 
 	//load page数据，顺便测量容器大小
 	if (isLoading || !width || !height) {

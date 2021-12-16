@@ -45,7 +45,7 @@ fontVariantLigatures?: FontVariantLigatures;
 fontVariationSettings?: string;
  */
 const App = () => {
-	const texts = [{
+	const data = [{
 		"name": "sent",
 		"id": ["-1"],
 		"text": " \"So you're admitting it?\" Zhan Wu Hen poked the Embodiment's forehead with his finger. The two-hundred-metre-tall Embodiment instantly froze in place, unable to move."
@@ -272,12 +272,13 @@ const App = () => {
 	}]
 
 	let title = {"name": "chapter", "id": ["-1"], text: "Chapter 1"};
-
-	texts.splice(0, 0, title)
+	data.splice(0, 0, title)
 
 
 	const [isLight, setLight] = useState(true);
 	const [fontSize, setFontSize] = useState(20);
+
+	const [texts, setTexts] = useState([]);
 
 	return (
 		<View style={StyleSheet.absoluteFill}>
@@ -325,6 +326,19 @@ const App = () => {
 				onPress={() => setFontSize(prev => prev - 1)}
 				activeOpacity={0.5}>
 				<Text>minus-font</Text>
+			</TouchableOpacity>
+
+
+			<TouchableOpacity
+				style={{
+					position: 'absolute',
+					top: 60,
+					alignSelf: 'center',
+					backgroundColor: 'green'
+				}}
+				onPress={() => setTexts(prev => prev.concat(data))}
+				activeOpacity={0.5}>
+				<Text>add next</Text>
 			</TouchableOpacity>
 
 
