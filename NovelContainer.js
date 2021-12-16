@@ -56,8 +56,9 @@ const formatParagraph = async (str, fontSize, maxWidth) => {
  * @param maxHeight
  * @param lineHeight
  * @param paragraphHeight
+ * @param paddingVertical
  */
-const formatPage = (paragraphs, fontSize, chapterFontSize, maxHeight, lineHeight, paragraphHeight) => {
+const formatPage = (paragraphs, fontSize, chapterFontSize, maxHeight, lineHeight, paragraphHeight, paddingVertical) => {
 
 	let pages = [];
 	let lines = 0;
@@ -65,7 +66,7 @@ const formatPage = (paragraphs, fontSize, chapterFontSize, maxHeight, lineHeight
 	while (cursor < paragraphs.length) {
 		let paragraph = paragraphs[cursor];
 		lines += paragraph.text.length;
-		const tspanY = getTspanY(lines, fontSize, chapterFontSize, lineHeight, paragraphHeight, cursor, pages.length === 0);
+		const tspanY = getTspanY(lines, fontSize, chapterFontSize, lineHeight, paragraphHeight, cursor, pages.length === 0, paddingVertical);
 		if (tspanY >= maxHeight) {
 			//这时做段落的拆分 因为这个段落
 			//先回退到上一个paragraph的状态
@@ -74,7 +75,7 @@ const formatPage = (paragraphs, fontSize, chapterFontSize, maxHeight, lineHeight
 			//有至少2行
 			if (paragraph.text.length >= 2) {
 				for (let i = 1; i <= paragraph.text.length; i++) {
-					const tspanY1 = getTspanY(lines + i, fontSize, chapterFontSize, lineHeight, paragraphHeight, cursor, pages.length === 0);
+					const tspanY1 = getTspanY(lines + i, fontSize, chapterFontSize, lineHeight, paragraphHeight, cursor, pages.length === 0, paddingVertical);
 					const pass = tspanY1 >= maxHeight;
 					//这种情况说明第一行就已经放不下了
 					if (i === 1 && pass) {
@@ -104,19 +105,18 @@ const formatPage = (paragraphs, fontSize, chapterFontSize, maxHeight, lineHeight
 		}
 	}
 	pages.push(paragraphs.slice(0, cursor))
-	console.log(JSON.stringify(pages))
 	return pages
 }
 
 //获取每行的y值
-const getTspanY = (preLines, fontSize, chapterFontSize, lineHeight, paragraphHeight, tsArrIndex, hasChapter) => {
+const getTspanY = (preLines, fontSize, chapterFontSize, lineHeight, paragraphHeight, tsArrIndex, hasChapter, paddingVertical) => {
 	let allFontSize = 0
 	if (hasChapter) {
 		allFontSize = fontSize * (preLines - 1) + chapterFontSize
 	} else {
 		allFontSize = preLines * fontSize
 	}
-	return allFontSize + (preLines - 1) * lineHeight + paragraphHeight * tsArrIndex
+	return allFontSize + (preLines - 1) * lineHeight + paragraphHeight * tsArrIndex + paddingVertical
 }
 
 const NovelContainer = ({
@@ -127,6 +127,8 @@ const NovelContainer = ({
 							paragraphHeight = 10,
 							fontColor = '#000000',
 							backgroundColor = '#FFFFFF',
+							paddingVertical = 20,
+							paddingLeft = 20
 						}) => {
 
 	const [width, setWidth] = useState(0);
@@ -140,10 +142,10 @@ const NovelContainer = ({
 			console.log('开始格式化')
 			let startTime = Date.now();
 			texts.map(async (item, index) => {
-				texts[index].text = await formatParagraph(item.text, fontSize, width)
+				texts[index].text = await formatParagraph(item.text, fontSize, width - paddingLeft)
 				//由于是多线程 现在检测是否还有为null的数据 没有的话表示格式化完成
 				if (texts.find((item) => typeof item.text === 'string') === undefined) {
-					setPages(formatPage(texts, fontSize, chapterFontSize, height, lineHeight, paragraphHeight))
+					setPages(formatPage(texts, fontSize, chapterFontSize, height, lineHeight, paragraphHeight, paddingVertical))
 					setLoading(false)
 					console.log(`耗时 ： ${Date.now() - startTime}`)
 				}
@@ -156,14 +158,18 @@ const NovelContainer = ({
 		return (
 			<MeasureSizeView
 				onLayout={(e) => {
-					setWidth(e.nativeEvent.layout.width)
-					setHeight(e.nativeEvent.layout.height)
+					setWidth(e.nativeEvent.layout.width - paddingLeft)
+					setHeight(e.nativeEvent.layout.height - paddingVertical * 2)
 				}}/>
 		)
 	}
 
 	return (
-		<Swiper showsPagination={false} loop={false}>
+		<Swiper
+			style={{backgroundColor}}
+			loadMinimalSize={2}
+			showsPagination={false}
+			loop={false}>
 
 			{
 				pages?.map((page, pageIndex) => {
@@ -173,8 +179,7 @@ const NovelContainer = ({
 						<Svg
 							key={pageIndex}
 							height={height}
-							width={width}
-							style={{backgroundColor}}>
+							width={width}>
 							{
 								page?.map((tsArr, tsArrIndex) => {
 									return (
@@ -188,8 +193,8 @@ const NovelContainer = ({
 													return (
 														<TSpan
 															key={tsIndex}
-															y={getTspanY(preLines, fontSize, chapterFontSize, lineHeight, paragraphHeight, tsArrIndex, pageIndex === 0)}
-															x={0}>
+															y={getTspanY(preLines, fontSize, chapterFontSize, lineHeight, paragraphHeight, tsArrIndex, pageIndex === 0, paddingVertical)}
+															x={paddingLeft}>
 															{ts}
 														</TSpan>
 													)

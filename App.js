@@ -270,8 +270,6 @@ const App = () => {
 		"id": ["-1"],
 		"text": " Zhan Wu Hen shouted angrily, \"Restrain your mind and keep your mind clear. Otherwise, you will be in deep trouble!\""
 	}]
-	const width = Dimensions.get('window').width;
-	const height = Dimensions.get('window').height;
 
 	let title = {"name": "chapter", "id": ["-1"], text: "Chapter 1"};
 
@@ -280,8 +278,11 @@ const App = () => {
 	return (
 		<View style={StyleSheet.absoluteFill}>
 
-			<View style={StyleSheet.absoluteFill}>
-				<NovelContainer texts={texts.slice(0, texts.length)} fontSize={20} chapterFontSize={36}/>
+			<View style={{flex: 1}}>
+				<NovelContainer
+					texts={texts.slice(0, texts.length)}
+					fontSize={20}
+					chapterFontSize={36}/>
 			</View>
 
 			{/*<View style={{width: 10, height: 720, backgroundColor: 'red', top: 0, position: 'absolute'}}/>*/}
