@@ -1,7 +1,24 @@
 import React, {useEffect, useState} from "react";
 import Svg, {Text, TSpan} from "react-native-svg";
-import {Dimensions} from "react-native";
+import {StyleSheet, View} from "react-native";
 import {getTextWidth} from "./textSizeUtil";
+import Swiper from 'react-native-swiper'
+
+/**
+ * 测量父容器尺寸的view
+ * @param onLayout
+ * @returns {JSX.Element}
+ * @constructor
+ */
+const MeasureSizeView = ({onLayout}) => {
+	return (
+		<View
+			onLayout={onLayout}
+			style={[{alignItems: 'center', justifyContent: 'center'}, StyleSheet.absoluteFill]}>
+			<View style={{width: 30, height: 30, backgroundColor: 'green'}}/>
+		</View>
+	)
+}
 
 /**
  * 格式化段落
@@ -93,56 +110,83 @@ const NovelContainer = ({
 							backgroundColor = '#FFFFFF',
 						}) => {
 
-	const width = Dimensions.get('window').width;
-	const height = Dimensions.get('window').height;
-
+	const [width, setWidth] = useState(0);
+	const [height, setHeight] = useState(0);
 	const [pages, setPages] = useState([]);
+	const [isLoading, setLoading] = useState(true);
+
 
 	useEffect(() => {
-		let startTime = Date.now();
-		texts.map(async (item, index) => {
-			texts[index].text = await formatParagraph(item.text, fontSize, width)
-			//由于是多线程 现在检测是否还有为null的数据 没有的话表示格式化完成
-			if (texts.find((item) => typeof item.text === 'string') === undefined) {
-				setPages(formatPage(texts, fontSize, height, lineHeight, paragraphHeight))
-				console.log(`耗时 ： ${Date.now() - startTime}`)
-			}
-		})
-	}, [])
+		if (width > 0 && height > 0) {
+			console.log('开始格式化')
+			let startTime = Date.now();
+			texts.map(async (item, index) => {
+				texts[index].text = await formatParagraph(item.text, fontSize, width)
+				//由于是多线程 现在检测是否还有为null的数据 没有的话表示格式化完成
+				if (texts.find((item) => typeof item.text === 'string') === undefined) {
+					setPages(formatPage(texts, fontSize, height, lineHeight, paragraphHeight))
+					setLoading(false)
+					console.log(`耗时 ： ${Date.now() - startTime}`)
+				}
+			})
+		}
+	}, [width, height])
 
-	//记录行数
-	let preLines = 0
+	//load page数据，顺便测量容器大小
+	if (isLoading || !width || !height) {
+		return (
+			<MeasureSizeView
+				onLayout={(e) => {
+					setWidth(e.nativeEvent.layout.width)
+					setHeight(e.nativeEvent.layout.height)
+				}}/>
+		)
+	}
 
 	return (
-		<Svg
-			height={height}
-			width={width}
-			style={{backgroundColor}}>
+		<Swiper showsPagination={false} loop={false}>
+
 			{
-				pages[1]?.map((tsArr, tsArrIndex) => {
+				pages?.map((page, pageIndex) => {
+					//记录行数
+					let preLines = 0
 					return (
-						<Text
-							key={tsArrIndex}
-							fill={fontColor}
-							fontSize={fontSize}>
+						<Svg
+							key={pageIndex}
+							height={height}
+							width={width}
+							style={{backgroundColor}}>
 							{
-								tsArr?.text?.map((ts, tsIndex) => {
-									preLines++
+								page?.map((tsArr, tsArrIndex) => {
 									return (
-										<TSpan
-											key={tsIndex}
-											y={getTspanY(preLines, fontSize, lineHeight, paragraphHeight, tsArrIndex)}
-											x={0}>
-											{ts}
-										</TSpan>
+										<Text
+											key={tsArrIndex}
+											fill={fontColor}
+											fontSize={fontSize}>
+											{
+												tsArr?.text?.map((ts, tsIndex) => {
+													preLines++
+													return (
+														<TSpan
+															key={tsIndex}
+															y={getTspanY(preLines, fontSize, lineHeight, paragraphHeight, tsArrIndex)}
+															x={0}>
+															{ts}
+														</TSpan>
+													)
+												})
+											}
+										</Text>
 									)
 								})
 							}
-						</Text>
+						</Svg>
 					)
 				})
 			}
-		</Svg>
+
+		</Swiper>
+
 	)
 
 }

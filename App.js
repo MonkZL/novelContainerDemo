@@ -276,7 +276,7 @@ const App = () => {
 		<SafeAreaView>
 
 			<View style={{width, height}}>
-				<NovelContainer texts={texts.slice(0, texts.length)} fontSize={20} backgroundColor={'green'}/>
+				<NovelContainer texts={texts.slice(0, texts.length)} fontSize={20}/>
 			</View>
 
 		</SafeAreaView>
