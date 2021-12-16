@@ -6,8 +6,8 @@
  * @flow strict-local
  */
 
-import React from 'react';
-import {Dimensions, SafeAreaView, View, StyleSheet} from 'react-native';
+import React, {useState} from 'react';
+import {Dimensions, SafeAreaView, View, StyleSheet, TouchableOpacity, Text} from 'react-native';
 import NovelContainer from "./NovelContainer";
 
 /*
@@ -275,15 +275,58 @@ const App = () => {
 
 	texts.splice(0, 0, title)
 
+
+	const [isLight, setLight] = useState(true);
+	const [fontSize, setFontSize] = useState(20);
+
 	return (
 		<View style={StyleSheet.absoluteFill}>
 
 			<View style={{flex: 1}}>
 				<NovelContainer
 					texts={texts.slice(0, texts.length)}
-					fontSize={20}
-					chapterFontSize={36}/>
+					fontSize={fontSize}
+					chapterFontSize={36}
+					fontColor={isLight ? '#000000' : '#FFFFFF'}
+					backgroundColor={isLight ? '#FFFFFF' : '#000000'}/>
 			</View>
+
+			<TouchableOpacity
+				style={{
+					position: 'absolute',
+					top: 0,
+					alignSelf: 'center',
+					backgroundColor: 'green'
+				}}
+				onPress={() => setLight(prev => !prev)}
+				activeOpacity={0.5}>
+				<Text>mode</Text>
+			</TouchableOpacity>
+
+			<TouchableOpacity
+				style={{
+					position: 'absolute',
+					top: 20,
+					alignSelf: 'center',
+					backgroundColor: 'green'
+				}}
+				onPress={() => setFontSize(prev => prev + 1)}
+				activeOpacity={0.5}>
+				<Text>plus-font</Text>
+			</TouchableOpacity>
+
+			<TouchableOpacity
+				style={{
+					position: 'absolute',
+					top: 40,
+					alignSelf: 'center',
+					backgroundColor: 'green'
+				}}
+				onPress={() => setFontSize(prev => prev - 1)}
+				activeOpacity={0.5}>
+				<Text>minus-font</Text>
+			</TouchableOpacity>
+
 
 			{/*<View style={{width: 10, height: 720, backgroundColor: 'red', top: 0, position: 'absolute'}}/>*/}
 

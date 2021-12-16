@@ -21,6 +21,29 @@ const MeasureSizeView = ({onLayout}) => {
 }
 
 /**
+ * 处理一个单词宽度大于最大长度的情况
+ * @param word
+ * @param fontSize
+ * @param maxWidth
+ */
+const formatOneWord = async (word, fontSize, maxWidth) => {
+	let cursor = 0;
+	let splitWords = [];
+	while (cursor <= word.length) {
+		const sliceWord = word.slice(0, cursor);
+		const width = await getTextWidth(sliceWord, fontSize, 0, sliceWord.length)
+		if (width > maxWidth) {
+			splitWords.push(word.slice(0, cursor - 1))
+			word = word.slice(cursor - 1, word.length)
+			cursor = 0
+		}
+		cursor++
+	}
+	splitWords.push(word.slice(0, cursor))
+	return splitWords
+}
+
+/**
  * 格式化段落
  * @param str
  * @param fontSize
@@ -34,11 +57,20 @@ const formatParagraph = async (str, fontSize, maxWidth) => {
 	})
 	let cursor = 0;
 	while (cursor <= strArr.length) {
+		//连接text 判断长度
 		let waitMeasureWithStr = strArr.slice(0, cursor).join(' ');
 		const width = await getTextWidth(waitMeasureWithStr, fontSize, 0, waitMeasureWithStr.length)
+
 		if (width > maxWidth) {
-			returnArr.push(strArr.slice(0, cursor - 1).join(' '))
-			strArr = strArr.slice(cursor - 1, strArr.length)
+			//如果一个单词的长度都大于最大宽度了 那么直接切割掉
+			if (cursor === 1) {
+				const wordSplit = await formatOneWord(waitMeasureWithStr, fontSize, maxWidth)
+				returnArr = returnArr.concat(wordSplit)
+				strArr = strArr.slice(1, strArr.length)
+			} else {
+				returnArr.push(strArr.slice(0, cursor - 1).join(' '))
+				strArr = strArr.slice(cursor - 1, strArr.length)
+			}
 			cursor = 0;
 		} else {
 			cursor++;
@@ -151,7 +183,7 @@ const NovelContainer = ({
 				}
 			})
 		}
-	}, [width, height])
+	}, [width, height, fontSize])
 
 	//load page数据，顺便测量容器大小
 	if (isLoading || !width || !height) {
