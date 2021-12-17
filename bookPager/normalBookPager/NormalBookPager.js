@@ -54,7 +54,8 @@ const NormalBookPager = () => {
 				getShowingRef().setNativeProps({
 					style: {
 						left: 0,
-						elevation: getViewData().elevationLeftCount
+						elevation: getViewData().elevationLeftCount,//兼容android
+						zIndex: getViewData().elevationLeftCount,//兼容ios
 					}
 				})
 				getCircleQueue().slideToShowed();
@@ -110,7 +111,8 @@ const NormalBookPager = () => {
 					getShowedRef().setNativeProps({
 						style: {
 							left: -width + moveXDistance,
-							elevation: getViewData().elevationRightCount
+							elevation: getViewData().elevationRightCount,//兼容android
+							zIndex: getViewData().elevationRightCount,//兼容ios
 						}
 					})
 					break;
@@ -162,7 +164,8 @@ const NormalBookPager = () => {
 						getShowedRef().setNativeProps({
 							style: {
 								left: moveXDistance - width,
-								elevation: getViewData().elevationRightCount
+								elevation: getViewData().elevationRightCount,//兼容android
+								zIndex: getViewData().elevationRightCount,//兼容ios
 							}
 						})
 						if (moveXDistance >= width) {
