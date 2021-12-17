@@ -80,8 +80,9 @@ const NormalBookPager = () => {
 		onPanResponderGrant: (evt, gestureState) => {
 			// 开始手势操作。给用户一些视觉反馈，让他们知道发生了什么事情！
 			// gestureState.{x,y} 现在会被设置为0
-			getViewData().elevationRightCount += 1
-			getViewData().elevationLeftCount -= 1
+			// 用作每个页面的海拔高度
+			getViewData().elevationRightCount += 10
+			getViewData().elevationLeftCount -= 10
 		},
 		// 移动途中的记录  有用信息 gestureState {moveX moveY}
 		onPanResponderMove: (evt, gestureState) => {
@@ -89,9 +90,9 @@ const NormalBookPager = () => {
 			// 最近一次的移动距离为gestureState.move{X,Y}
 			// 从成为响应者开始时的累计手势移动距离为gestureState.d{x,y}
 			// 未释放完成 不能操作
-			// if (!getViewData().releaseOver) {
-			// 	return
-			// }
+			if (!getViewData().releaseOver) {
+				return
+			}
 			const {x0, moveX} = gestureState;
 			// 水平拖动的距离
 			let moveXDistance = moveX - x0
