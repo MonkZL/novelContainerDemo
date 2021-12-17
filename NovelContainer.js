@@ -2,7 +2,6 @@ import React, {forwardRef, useEffect, useImperativeHandle, useRef, useState} fro
 import Svg, {Text, TSpan} from "react-native-svg";
 import {StyleSheet, View, Text as RNText} from "react-native";
 import {getTextWidth} from "./textSizeUtil";
-import Swiper from 'react-native-swiper'
 import {PagerView} from "react-native-pager-view";
 
 /**
