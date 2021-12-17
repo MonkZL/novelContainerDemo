@@ -1,8 +1,9 @@
-import React, {useEffect, useState} from "react";
+import React, {forwardRef, useEffect, useImperativeHandle, useRef, useState} from "react";
 import Svg, {Text, TSpan} from "react-native-svg";
-import {StyleSheet, View} from "react-native";
+import {StyleSheet, View, Text as RNText} from "react-native";
 import {getTextWidth} from "./textSizeUtil";
 import Swiper from 'react-native-swiper'
+import {PagerView} from "react-native-pager-view";
 
 /**
  * 测量父容器尺寸的view
@@ -151,39 +152,93 @@ const getTspanY = (preLines, fontSize, chapterFontSize, lineHeight, paragraphHei
 	return allFontSize + (preLines - 1) * lineHeight + paragraphHeight * tsArrIndex + paddingVertical
 }
 
-const NovelContainer = ({
-							texts = [],
-							fontSize = 14,
-							chapterFontSize = 14,
-							lineHeight = 10,
-							paragraphHeight = 10,
-							fontColor = '#000000',
-							backgroundColor = '#FFFFFF',
-							paddingVertical = 20,
-							paddingLeft = 20
-						}) => {
+const NovelContainer = forwardRef(({
+									   currentChapter = [],
+									   fontSize = 14,
+									   chapterFontSize = 14,
+									   lineHeight = 10,
+									   paragraphHeight = 10,
+									   fontColor = '#000000',
+									   backgroundColor = '#FFFFFF',
+									   paddingVertical = 20,
+									   paddingLeft = 20
+								   }, ref) => {
+
 
 	const [width, setWidth] = useState(0);
 	const [height, setHeight] = useState(0);
-	const [pages, setPages] = useState([]);
+	const [chapters, setChapters] = useState([]);
 	const [isLoading, setLoading] = useState(true);
+	const pagerViewRef = useRef();
+	const [pagerIndex, setPagerIndex] = useState(0);
 
-	//TODO 支持再次添加 chapter 在后台静默格式化
-	useEffect(() => {
+	/**
+	 * 格式化chapter
+	 * @param chapter
+	 * @param position 0 往前添加 1 往后添加 2 重置
+	 */
+	const formatChapter = (chapter, position = 2) => {
 		if (width > 0 && height > 0) {
 			console.log('开始格式化')
 			let startTime = Date.now();
-			texts.map(async (item, index) => {
-				texts[index].text = await formatParagraph(item.text, fontSize, width - paddingLeft)
+			chapter.map(async (item, index) => {
+				chapter[index].text = await formatParagraph(item.text, fontSize, width - paddingLeft)
 				//由于是多线程 现在检测是否还有为null的数据 没有的话表示格式化完成
-				if (texts.find((item) => typeof item.text === 'string') === undefined) {
-					setPages(formatPage(texts, fontSize, chapterFontSize, height, lineHeight, paragraphHeight, paddingVertical))
+				if (chapter.find((item) => typeof item.text === 'string') === undefined) {
+					const formatPageData = formatPage(chapter, fontSize, chapterFontSize, height, lineHeight, paragraphHeight, paddingVertical);
+					const formatPageDataLength = formatPageData.length
+					const chaptersCopy = [...chapters]
+					switch (position) {
+						//往前添加
+						case 0:
+							chaptersCopy.unshift(formatPageData)
+							setChapters(chaptersCopy)
+							//TODO 优化体验 如果不行可能要自己些viewpager
+							setTimeout(() => {
+								pagerViewRef.current?.setPageWithoutAnimation(formatPageDataLength + pagerIndex)
+							})
+							break
+						//往后添加
+						case 1:
+							chaptersCopy.push(formatPageData)
+							setChapters(chaptersCopy)
+							break
+						//重置
+						case 2:
+							setChapters([formatPageData])
+							pagerViewRef.current?.setPageWithoutAnimation(0)
+							break
+						default:
+					}
 					setLoading(false)
 					console.log(`耗时 ： ${Date.now() - startTime}`)
 				}
 			})
 		}
-	}, [width, height, fontSize, texts])
+	}
+
+	//初始化第一个章节
+	useEffect(() => {
+		formatChapter(currentChapter)
+	}, [width, height])
+
+
+	useImperativeHandle(ref, () => {
+		return {
+			//添加前一章
+			addPreChapter: (chapter) => {
+				formatChapter(chapter, 0)
+			},
+			//添加后一章
+			addNextChapter: (chapter) => {
+				formatChapter(chapter, 1)
+			},
+			//替换当前所有章节
+			replaceChapter: (chapter) => {
+				formatChapter(chapter, 2)
+			}
+		}
+	})
 
 	//load page数据，顺便测量容器大小
 	if (isLoading || !width || !height) {
@@ -196,55 +251,76 @@ const NovelContainer = ({
 		)
 	}
 
+	//组合所有章节的数据
+	const getPagesData = () => {
+		let pagesData = []
+		chapters.map((chapter, chapterIndex) => {
+			pagesData = pagesData.concat(chapter)
+		})
+		return pagesData
+	}
+
+	const pagesData = getPagesData()
+
 	return (
-		<Swiper
-			style={{backgroundColor}}
-			loadMinimalSize={2}
-			showsPagination={false}
-			loop={false}>
+		<>
+			<PagerView
+				ref={pagerViewRef}
+				style={{backgroundColor, flex: 1}}
+				initialPage={0}
+				offscreenPageLimit={2}
+				onPageSelected={(event) => {
+					setPagerIndex(event?.nativeEvent?.position || 0)
+				}}>
 
-			{
-				pages?.map((page, pageIndex) => {
-					//记录行数
-					let preLines = 0
-					return (
-						<Svg
-							key={pageIndex}
-							height={height}
-							width={width}>
-							{
-								page?.map((tsArr, tsArrIndex) => {
-									return (
-										<Text
-											key={tsArrIndex}
-											fill={fontColor}
-											fontSize={tsArr.name === 'chapter' ? chapterFontSize : fontSize}>
-											{
-												tsArr?.text?.map((ts, tsIndex) => {
-													preLines++
-													return (
-														<TSpan
-															key={tsIndex}
-															y={getTspanY(preLines, fontSize, chapterFontSize, lineHeight, paragraphHeight, tsArrIndex, pageIndex === 0, paddingVertical)}
-															x={paddingLeft}>
-															{ts}
-														</TSpan>
-													)
-												})
-											}
-										</Text>
-									)
-								})
-							}
-						</Svg>
-					)
-				})
-			}
+				{
+					pagesData?.map((page, pageIndex) => {
+						//记录行数
+						let preLines = 0
+						return (
+							<Svg
+								key={pageIndex}
+								height={height}
+								width={width}>
+								{
+									page?.map((tsArr, tsArrIndex) => {
+										return (
+											<Text
+												key={tsArrIndex}
+												fill={fontColor}
+												//这里用 tsArr.name === 'chapter' 是为了保证只有标题受影响
+												fontSize={tsArr.name === 'chapter' ? chapterFontSize : fontSize}>
+												{
+													tsArr?.text?.map((ts, tsIndex) => {
+														preLines++
+														return (
+															<TSpan
+																key={tsIndex}
+																//这里用 page[0].name === 'chapter' 是为了保证所有文字受影响
+																y={getTspanY(preLines, fontSize, chapterFontSize, lineHeight, paragraphHeight, tsArrIndex, page[0].name === 'chapter', paddingVertical)}
+																x={paddingLeft}>
+																{ts}
+															</TSpan>
+														)
+													})
+												}
+											</Text>
+										)
+									})
+								}
+							</Svg>
+						)
+					})
+				}
 
-		</Swiper>
+			</PagerView>
 
+			<View style={{position: 'absolute', bottom: 10, right: 10}}>
+				<RNText>{`${pagerIndex + 1}/${pagesData.length}`}</RNText>
+			</View>
+		</>
 	)
 
-}
+})
 
 export default NovelContainer
