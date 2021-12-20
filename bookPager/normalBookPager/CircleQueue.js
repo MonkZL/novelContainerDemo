@@ -198,4 +198,18 @@ export default class CircleQueue {
 		return !(this.chapterIndex === 0 && this.pageIndex === 0)
 	}
 
+	addPreChapters(chapters) {
+		this.chapters = chapters.concat(this.chapters)
+		//由于往前加了数据，所以当前阅读的章节要加上添加的章节数
+		this.chapterIndex += chapters.length
+		//手动刷新前一个页面 ，避免 当前页面是第一个页面，不自动刷新
+		this.getShowed().ref.setPageData(this.getShowedData())
+	}
+
+	addNextChapters(chapters) {
+		this.chapters = this.chapters.concat(chapters)
+		//手动刷新最后一个页面 ，避免 当前页面是最后一个页面，不自动刷新
+		this.getWaitShow().ref.setPageData(this.getWaitShowData())
+	}
+
 }

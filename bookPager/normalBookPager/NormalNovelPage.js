@@ -1,5 +1,5 @@
 import React, {forwardRef, useImperativeHandle, useRef, useState} from "react";
-import {StatusBar, Text, View} from "react-native";
+import {Text, View} from "react-native";
 import NovelPage from "../NovelPage";
 
 const NormalNovelPage = forwardRef(({

@@ -37,6 +37,8 @@ const NovelContainer = forwardRef(({
 	const [chapters, setChapters] = useState([]);
 	const [isLoading, setLoading] = useState(true);
 
+	const bookPager = useRef();
+
 	/**
 	 * 格式化chapter
 	 * @param chapter
@@ -55,13 +57,11 @@ const NovelContainer = forwardRef(({
 					switch (position) {
 						//往前添加
 						case 0:
-							chaptersCopy.unshift(formatPageData)
-							setChapters(chaptersCopy)
+							bookPager.current?.addPreChapters([formatPageData])
 							break
 						//往后添加
 						case 1:
-							chaptersCopy.push(formatPageData)
-							setChapters(chaptersCopy)
+							bookPager.current?.addNextChapters([formatPageData])
 							break
 						//重置
 						case 2:
@@ -112,6 +112,7 @@ const NovelContainer = forwardRef(({
 
 	return (
 		<NormalBookPager
+			ref={bookPager}
 			width={width}
 			height={height}
 			chapters={chapters}

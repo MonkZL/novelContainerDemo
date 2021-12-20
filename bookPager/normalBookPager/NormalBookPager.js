@@ -1,4 +1,4 @@
-import React, {forwardRef, useRef} from "react";
+import React, {forwardRef, useImperativeHandle, useRef} from "react";
 import {Dimensions, PanResponder, Text, View} from "react-native";
 import CircleQueue from "./CircleQueue";
 import NormalNovelPage from "./NormalNovelPage";
@@ -276,6 +276,13 @@ const NormalBookPager = forwardRef(({
 				ref={setRef}/>
 		)
 	}
+
+	useImperativeHandle(ref, () => {
+		return {
+			addPreChapters: (chapters) => getCircleQueue().addPreChapters(chapters),
+			addNextChapters: (chapters) => getCircleQueue().addNextChapters(chapters)
+		}
+	})
 
 	return (
 		<View {..._panResponder.panHandlers} style={{flex: 1, backgroundColor: '#FFFFFF'}}>
