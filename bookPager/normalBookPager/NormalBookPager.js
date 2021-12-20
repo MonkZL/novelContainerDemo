@@ -42,6 +42,7 @@ const NormalBookPager = forwardRef(({
 										chapters,
 										chapterIndex,
 										pageIndex,
+										needAddOffset = 1,
 										needAddPreDataCallback,
 										needAddNextDataCallback,
 										fontColor,
@@ -97,6 +98,9 @@ const NormalBookPager = forwardRef(({
 				})
 				//重置page status
 				getCircleQueue().slideToShowed();
+				if (getCircleQueue().hasNextPageNum() <= needAddOffset) {
+					needAddNextDataCallback && needAddNextDataCallback()
+				}
 				break;
 			case Direction_Right:
 				//确保右移的page到了屏幕中
@@ -107,6 +111,10 @@ const NormalBookPager = forwardRef(({
 				})
 				//重置page status
 				getCircleQueue().slideToShowing();
+				console.log(getCircleQueue().hasPrePageNum())
+				if (getCircleQueue().hasPrePageNum() <= needAddOffset) {
+					needAddPreDataCallback && needAddPreDataCallback()
+				}
 				break
 		}
 	}

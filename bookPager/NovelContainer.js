@@ -28,7 +28,9 @@ const NovelContainer = forwardRef(({
 									   fontColor = '#000000',
 									   backgroundColor = '#FFFFFF',
 									   paddingVertical = 20,
-									   paddingLeft = 20
+									   paddingLeft = 20,
+									   needAddPreDataCallback,
+									   needAddNextDataCallback
 								   }, ref) => {
 
 
@@ -118,10 +120,8 @@ const NovelContainer = forwardRef(({
 			chapters={chapters}
 			chapterIndex={0}
 			pageIndex={0}
-			needAddPreDataCallback={() => {
-			}}
-			needAddNextDataCallback={() => {
-			}}
+			needAddPreDataCallback={needAddPreDataCallback}
+			needAddNextDataCallback={needAddNextDataCallback}
 			fontColor={fontColor}
 			chapterFontSize={chapterFontSize}
 			fontSize={fontSize}

@@ -962,6 +962,12 @@ const App = () => {
 			<StatusBar/>
 			<View style={{flex: 1}}>
 				<NovelContainer
+					needAddPreDataCallback={()=>{
+						novelContainer.current.addPreChapter([...dataPre])
+					}}
+					needAddNextDataCallback={()=>{
+						novelContainer.current.addNextChapter([...dataNext])
+					}}
 					ref={novelContainer}
 					currentChapter={[...data]}
 					fontSize={fontSize}

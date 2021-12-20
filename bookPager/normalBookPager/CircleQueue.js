@@ -190,14 +190,17 @@ export default class CircleQueue {
 		}
 	}
 
+	//能否左滑
 	canSlideToShowed() {
 		return !(this.chapterIndex === this.chapters.length - 1 && this.pageIndex === this.chapters[this.chapterIndex].length - 1)
 	}
 
+	//能否右滑
 	canSlideToShowing() {
 		return !(this.chapterIndex === 0 && this.pageIndex === 0)
 	}
 
+	//往前添加章节
 	addPreChapters(chapters) {
 		this.chapters = chapters.concat(this.chapters)
 		//由于往前加了数据，所以当前阅读的章节要加上添加的章节数
@@ -206,10 +209,28 @@ export default class CircleQueue {
 		this.getShowed().ref.setPageData(this.getShowedData())
 	}
 
+	//往后添加章节
 	addNextChapters(chapters) {
 		this.chapters = this.chapters.concat(chapters)
 		//手动刷新最后一个页面 ，避免 当前页面是最后一个页面，不自动刷新
 		this.getWaitShow().ref.setPageData(this.getWaitShowData())
 	}
 
+	//当前页面之前有多少页面
+	hasPrePageNum() {
+		let pageNum = 0;
+		for (let i = 0; i < this.chapterIndex; i++) {
+			pageNum += this.chapters[i].length
+		}
+		return pageNum + this.pageIndex
+	}
+
+	//当前页面之后有多少页面
+	hasNextPageNum() {
+		let pageNum = this.chapters[this.chapterIndex].length - this.pageIndex - 1
+		for (let i = this.chapterIndex + 1; i < this.chapters.length; i++) {
+			pageNum += this.chapters[i].length
+		}
+		return pageNum
+	}
 }
