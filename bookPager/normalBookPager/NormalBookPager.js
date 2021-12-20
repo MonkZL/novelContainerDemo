@@ -256,53 +256,32 @@ const NormalBookPager = forwardRef(({
 		},
 	});
 
+	const renderNormalNovelPage = (pageData, setRef) => {
+		return (
+			<NormalNovelPage
+				width={width}
+				height={height}
+				fontColor={fontColor}
+				chapterFontSize={chapterFontSize}
+				fontSize={fontSize}
+				lineHeight={lineHeight}
+				paddingLeft={paddingLeft}
+				paddingVertical={paddingVertical}
+				paragraphHeight={paragraphHeight}
+				backgroundColor={'#FFFFFF'}
+				pageData={pageData}
+				ref={setRef}/>
+		)
+	}
 
 	return (
 		<View {..._panResponder.panHandlers} style={{width, height}}>
 
-			<NormalNovelPage
-				width={width}
-				height={height}
-				fontColor={fontColor}
-				chapterFontSize={chapterFontSize}
-				fontSize={fontSize}
-				lineHeight={lineHeight}
-				paddingLeft={paddingLeft}
-				paddingVertical={paddingVertical}
-				paragraphHeight={paragraphHeight}
-				backgroundColor={'yellow'}
-				pageData={getCircleQueue().getShowedData()}
-				ref={ref => getCircleQueue().assignmentShowedRef(ref)}/>
+			{renderNormalNovelPage(getCircleQueue().getShowedData(), ref => getCircleQueue().assignmentShowedRef(ref))}
 
+			{renderNormalNovelPage(getCircleQueue().getWaitShowData(), ref => getCircleQueue().assignmentWaitShowRef(ref))}
 
-			<NormalNovelPage
-				width={width}
-				height={height}
-				fontColor={fontColor}
-				chapterFontSize={chapterFontSize}
-				fontSize={fontSize}
-				lineHeight={lineHeight}
-				paddingLeft={paddingLeft}
-				paddingVertical={paddingVertical}
-				paragraphHeight={paragraphHeight}
-				backgroundColor={'pink'}
-				pageData={getCircleQueue().getWaitShowData()}
-				ref={ref => getCircleQueue().assignmentWaitShowRef(ref)}/>
-
-
-			<NormalNovelPage
-				width={width}
-				height={height}
-				fontColor={fontColor}
-				chapterFontSize={chapterFontSize}
-				fontSize={fontSize}
-				lineHeight={lineHeight}
-				paddingLeft={paddingLeft}
-				paddingVertical={paddingVertical}
-				paragraphHeight={paragraphHeight}
-				backgroundColor={'green'}
-				pageData={getCircleQueue().getShowingData()}
-				ref={ref => getCircleQueue().assignmentShowingRef(ref)}/>
+			{renderNormalNovelPage(getCircleQueue().getShowingData(), ref => getCircleQueue().assignmentShowingRef(ref))}
 
 		</View>
 	)
