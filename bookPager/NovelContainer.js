@@ -1,7 +1,7 @@
 import React, {forwardRef, useEffect, useImperativeHandle, useRef, useState} from "react";
 import {StyleSheet, View} from "react-native";
-import {formatPage, formatParagraph} from "./bookPager/BookPagerUtil";
-import NormalBookPager from "./bookPager/normalBookPager/NormalBookPager";
+import {formatPage, formatParagraph} from "./BookPagerUtil";
+import NormalBookPager from "./normalBookPager/NormalBookPager";
 
 /**
  * 测量父容器尺寸的view

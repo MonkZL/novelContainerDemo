@@ -8,7 +8,7 @@
 
 import React, {useRef, useState} from 'react';
 import {Dimensions, SafeAreaView, View, StyleSheet, TouchableOpacity, Text} from 'react-native';
-import NovelContainer from "./NovelContainer";
+import NovelContainer from "./bookPager/NovelContainer";
 
 
 const data = [{"name": "chapter", "id": ["-1"], text: "Chapter 1"},{
