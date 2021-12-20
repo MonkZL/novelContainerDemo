@@ -1,7 +1,6 @@
-import React from "react";
-import {View} from "react-native";
+import React, {forwardRef, useImperativeHandle, useRef, useState} from "react";
+import {StatusBar, Text, View} from "react-native";
 import NovelPage from "../NovelPage";
-import {forwardRef, useImperativeHandle, useRef, useState} from "react";
 
 const NormalNovelPage = forwardRef(({
 										pageData,
@@ -14,7 +13,7 @@ const NormalNovelPage = forwardRef(({
 										paddingLeft,
 										paddingVertical,
 										paragraphHeight,
-										backgroundColor
+										backgroundColor,
 									}, ref) => {
 
 	const [novelData, setNovelData] = useState(pageData);
@@ -31,9 +30,16 @@ const NormalNovelPage = forwardRef(({
 
 	return (
 		<View ref={viewRef}
-			  style={{width, height, backgroundColor, position: 'absolute', opacity: 1, alignItems: 'center', justifyContent: 'center'}}>
+			  style={{
+				  backgroundColor: '#FFFFFF',
+				  position: 'absolute',
+				  opacity: 1,
+				  width: '100%',
+				  top: 0,
+				  bottom: 0,
+			  }}>
 			<NovelPage
-				pageData={novelData}
+				pageData={novelData?.data}
 				height={height}
 				width={width}
 				fontColor={fontColor}
@@ -43,6 +49,10 @@ const NormalNovelPage = forwardRef(({
 				paddingLeft={paddingLeft}
 				paddingVertical={paddingVertical}
 				paragraphHeight={paragraphHeight}/>
+			<View style={{position: 'absolute', bottom: 20, left: 20, right: 20}}>
+				<Text style={{position: 'absolute', left: 0, fontSize: 12, color: '#CECECE'}}>{novelData.chapterName}</Text>
+				<Text style={{position: 'absolute', right: 0, fontSize: 12, color: '#CECECE'}}>{novelData.chapterIndex}</Text>
+			</View>
 		</View>
 	)
 })

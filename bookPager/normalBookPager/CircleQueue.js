@@ -159,23 +159,35 @@ export default class CircleQueue {
 	getShowedData() {
 		const showedIndex = this.getShowedIndex();
 		if (!showedIndex) {
-			return []
+			return {}
 		}
-		return this.chapters[showedIndex.chapterIndex][showedIndex.pageIndex]
+		return {
+			data: this.chapters[showedIndex.chapterIndex][showedIndex.pageIndex],
+			chapterName: this.chapters[showedIndex.chapterIndex][0][0].text.join(),
+			chapterIndex: `${showedIndex.pageIndex + 1}/${this.chapters[showedIndex.chapterIndex].length}`
+		}
 	}
 
 	//获取展示中的数据
 	getShowingData() {
-		return this.chapters[this.chapterIndex][this.pageIndex]
+		return {
+			data: this.chapters[this.chapterIndex][this.pageIndex],
+			chapterName: this.chapters[this.chapterIndex][0][0].text.join(),
+			chapterIndex: `${this.pageIndex + 1}/${this.chapters[this.chapterIndex].length}`
+		}
 	}
 
 	//获取待展示的数据
 	getWaitShowData() {
 		const waitShowIndex = this.getWaitShowIndex();
 		if (!waitShowIndex) {
-			return []
+			return {}
 		}
-		return this.chapters[waitShowIndex.chapterIndex][waitShowIndex.pageIndex]
+		return {
+			data: this.chapters[waitShowIndex.chapterIndex][waitShowIndex.pageIndex],
+			chapterName: this.chapters[waitShowIndex.chapterIndex][0][0].text.join(),
+			chapterIndex: `${waitShowIndex.pageIndex + 1}/${this.chapters[waitShowIndex.chapterIndex].length}`
+		}
 	}
 
 	canSlideToShowed() {

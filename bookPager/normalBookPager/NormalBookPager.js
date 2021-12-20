@@ -1,5 +1,5 @@
 import React, {forwardRef, useRef} from "react";
-import {Dimensions, PanResponder, View} from "react-native";
+import {Dimensions, PanResponder, Text, View} from "react-native";
 import CircleQueue from "./CircleQueue";
 import NormalNovelPage from "./NormalNovelPage";
 
@@ -9,9 +9,6 @@ const Direction_Right = 'right';
 const intervalTime = 10;
 //每次移动距离
 const moveDistance = 20
-
-const width = Dimensions.get('window').width;
-const height = Dimensions.get('window').height;
 
 /**
  * TODO 目前基础功能完成，能够无限滑动，还剩下以下一些功能
@@ -40,6 +37,8 @@ const height = Dimensions.get('window').height;
  * @constructor
  */
 const NormalBookPager = forwardRef(({
+										width,
+										height,
 										chapters,
 										chapterIndex,
 										pageIndex,
@@ -156,6 +155,8 @@ const NormalBookPager = forwardRef(({
 					getShowingRef().setNativeProps({
 						style: {
 							left: moveXDistance,
+							elevation: getViewData().elevationRightCount,//兼容android
+							zIndex: getViewData().elevationRightCount,//兼容ios
 						}
 					})
 					break;
@@ -212,6 +213,8 @@ const NormalBookPager = forwardRef(({
 						getShowingRef().setNativeProps({
 							style: {
 								left: moveXDistance,
+								elevation: getViewData().elevationRightCount,//兼容android
+								zIndex: getViewData().elevationRightCount,//兼容ios
 							}
 						})
 						if (moveXDistance <= -width) {
@@ -275,13 +278,20 @@ const NormalBookPager = forwardRef(({
 	}
 
 	return (
-		<View {..._panResponder.panHandlers} style={{width, height}}>
+		<View {..._panResponder.panHandlers} style={{flex: 1, backgroundColor: '#FFFFFF'}}>
 
-			{renderNormalNovelPage(getCircleQueue().getShowedData(), ref => getCircleQueue().assignmentShowedRef(ref))}
+			{
+				renderNormalNovelPage(getCircleQueue().getShowedData(), ref => getCircleQueue().assignmentShowedRef(ref))
+			}
 
-			{renderNormalNovelPage(getCircleQueue().getWaitShowData(), ref => getCircleQueue().assignmentWaitShowRef(ref))}
+			{
+				renderNormalNovelPage(getCircleQueue().getWaitShowData(), ref => getCircleQueue().assignmentWaitShowRef(ref))
+			}
 
-			{renderNormalNovelPage(getCircleQueue().getShowingData(), ref => getCircleQueue().assignmentShowingRef(ref))}
+			{
+				renderNormalNovelPage(getCircleQueue().getShowingData(), ref => getCircleQueue().assignmentShowingRef(ref))
+			}
+
 
 		</View>
 	)

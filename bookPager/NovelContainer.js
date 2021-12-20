@@ -36,8 +36,6 @@ const NovelContainer = forwardRef(({
 	const [height, setHeight] = useState(0);
 	const [chapters, setChapters] = useState([]);
 	const [isLoading, setLoading] = useState(true);
-	const pagerViewRef = useRef();
-	const [pagerIndex, setPagerIndex] = useState(0);
 
 	/**
 	 * 格式化chapter
@@ -53,17 +51,12 @@ const NovelContainer = forwardRef(({
 				//由于是多线程 现在检测是否还有为null的数据 没有的话表示格式化完成
 				if (chapter.find((item) => typeof item.text === 'string') === undefined) {
 					const formatPageData = formatPage(chapter, fontSize, chapterFontSize, height, lineHeight, paragraphHeight, paddingVertical);
-					const formatPageDataLength = formatPageData.length
 					const chaptersCopy = [...chapters]
 					switch (position) {
 						//往前添加
 						case 0:
 							chaptersCopy.unshift(formatPageData)
 							setChapters(chaptersCopy)
-							//TODO 优化体验 如果不行可能要自己些viewpager
-							setTimeout(() => {
-								pagerViewRef.current?.setPageWithoutAnimation(formatPageDataLength + pagerIndex)
-							})
 							break
 						//往后添加
 						case 1:
@@ -73,7 +66,6 @@ const NovelContainer = forwardRef(({
 						//重置
 						case 2:
 							setChapters([formatPageData])
-							pagerViewRef.current?.setPageWithoutAnimation(0)
 							break
 						default:
 					}
@@ -119,20 +111,23 @@ const NovelContainer = forwardRef(({
 	}
 
 	return (
-		<NormalBookPager chapters={chapters}
-						 chapterIndex={0}
-						 pageIndex={0}
-						 needAddPreDataCallback={() => {
-						 }}
-						 needAddNextDataCallback={() => {
-						 }}
-						 fontColor={fontColor}
-						 chapterFontSize={chapterFontSize}
-						 fontSize={fontSize}
-						 paddingLeft={paddingLeft}
-						 paddingVertical={paddingVertical}
-						 lineHeight={lineHeight}
-						 paragraphHeight={paragraphHeight}/>
+		<NormalBookPager
+			width={width}
+			height={height}
+			chapters={chapters}
+			chapterIndex={0}
+			pageIndex={0}
+			needAddPreDataCallback={() => {
+			}}
+			needAddNextDataCallback={() => {
+			}}
+			fontColor={fontColor}
+			chapterFontSize={chapterFontSize}
+			fontSize={fontSize}
+			paddingLeft={paddingLeft}
+			paddingVertical={paddingVertical}
+			lineHeight={lineHeight}
+			paragraphHeight={paragraphHeight}/>
 	)
 
 })

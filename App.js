@@ -7,7 +7,7 @@
  */
 
 import React, {useRef, useState} from 'react';
-import {Dimensions, SafeAreaView, View, StyleSheet, TouchableOpacity, Text} from 'react-native';
+import {Dimensions, SafeAreaView, View, StyleSheet, TouchableOpacity, Text, StatusBar} from 'react-native';
 import NovelContainer from "./bookPager/NovelContainer";
 
 
@@ -959,7 +959,7 @@ const App = () => {
 
 	return (
 		<View style={StyleSheet.absoluteFill}>
-
+			<StatusBar/>
 			<View style={{flex: 1}}>
 				<NovelContainer
 					ref={novelContainer}
