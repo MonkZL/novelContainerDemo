@@ -21,8 +21,17 @@ const showed = 'showed'
 export default class CircleQueue {
 
 	node0;
+	chapters;
+	chapterIndex;
+	pageIndex;
 
-	constructor() {
+
+	constructor({chapters, chapterIndex, pageIndex}) {
+
+		this.chapters = chapters;
+		this.chapterIndex = chapterIndex;
+		this.pageIndex = pageIndex;
+
 		this.node0 = {id: 1, ref: null, status: showing, nextNode: null, preNode: null}
 		const node1 = {id: 2, ref: null, status: waitShow, nextNode: null, preNode: null}
 		const node2 = {id: 3, ref: null, status: showed, nextNode: null, preNode: null}
@@ -66,6 +75,13 @@ export default class CircleQueue {
 		nodeShowing.status = showed
 		nodeShowing.preNode.status = waitShow
 		nodeShowing.nextNode.status = showing
+
+		const waitShowIndex = this.getWaitShowIndex();
+		if (waitShowIndex) {
+			this.chapterIndex = waitShowIndex.chapterIndex
+			this.pageIndex = waitShowIndex.pageIndex
+		}
+		this.getWaitShow().ref.setPageData(this.getWaitShowData())
 	}
 
 	slideToShowing() {
@@ -73,17 +89,93 @@ export default class CircleQueue {
 		nodeShowing.status = waitShow
 		nodeShowing.preNode.status = showing
 		nodeShowing.nextNode.status = showed
+
+		const showedIndex = this.getShowedIndex();
+		if (showedIndex) {
+			this.chapterIndex = showedIndex.chapterIndex
+			this.pageIndex = showedIndex.pageIndex
+		}
+		this.getShowed().ref.setPageData(this.getShowedData())
 	}
 
 	assignmentShowedRef(ref) {
+		if (this.getShowed().ref) {
+			return
+		}
 		this.getShowed().ref = ref
 	}
 
 	assignmentShowingRef(ref) {
+		if (this.getShowing().ref) {
+			return
+		}
 		this.getShowing().ref = ref
 	}
 
 	assignmentWaitShowRef(ref) {
+		if (this.getWaitShow().ref) {
+			return
+		}
 		this.getWaitShow().ref = ref
 	}
+
+	//获取已展示的index
+	getShowedIndex() {
+		let chapterIndex = this.chapterIndex
+		let pageIndex = this.pageIndex
+		//如果目前页码是本章第一页
+		if (pageIndex === 0) {
+			//如果目前是第一章
+			if (chapterIndex === 0) {
+				return null
+			}
+			chapterIndex -= 1
+			pageIndex = this.chapters[chapterIndex].length - 1
+		} else {
+			pageIndex--
+		}
+		return {chapterIndex, pageIndex}
+	}
+
+	//获取等待展示的index
+	getWaitShowIndex() {
+		let chapterIndex = this.chapterIndex;
+		let pageIndex = this.pageIndex;
+		//如果已经是本章最后一页了
+		if (pageIndex === this.chapters[chapterIndex].length - 1) {
+			//如果已经是最后一章了
+			if (chapterIndex === this.chapters.length - 1) {
+				return null
+			}
+			chapterIndex += 1
+			pageIndex = 0
+		} else {
+			pageIndex++
+		}
+		return {chapterIndex, pageIndex}
+	}
+
+	//获取展示过的数据
+	getShowedData() {
+		const showedIndex = this.getShowedIndex();
+		if (!showedIndex) {
+			return []
+		}
+		return this.chapters[showedIndex.chapterIndex][showedIndex.pageIndex]
+	}
+
+	//获取展示中的数据
+	getShowingData() {
+		return this.chapters[this.chapterIndex][this.pageIndex]
+	}
+
+	//获取待展示的数据
+	getWaitShowData() {
+		const waitShowIndex = this.getWaitShowIndex();
+		if (!waitShowIndex) {
+			return []
+		}
+		return this.chapters[waitShowIndex.chapterIndex][waitShowIndex.pageIndex]
+	}
+
 }

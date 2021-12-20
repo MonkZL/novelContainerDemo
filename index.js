@@ -9,4 +9,4 @@ import TestApp from "./TestApp";
 import NormalBookPager from "./bookPager/normalBookPager/NormalBookPager";
 
 
-AppRegistry.registerComponent(appName, () => NormalBookPager);
+AppRegistry.registerComponent(appName, () => App);

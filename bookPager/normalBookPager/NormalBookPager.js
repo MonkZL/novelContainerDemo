@@ -1,6 +1,7 @@
-import React, {useRef} from "react";
-import {Dimensions, PanResponder, Text, View, StyleSheet} from "react-native";
+import React, {forwardRef, useRef} from "react";
+import {Dimensions, PanResponder, View} from "react-native";
 import CircleQueue from "./CircleQueue";
+import NormalNovelPage from "./NormalNovelPage";
 
 const Direction_Left = 'left';
 const Direction_Right = 'right';
@@ -12,32 +13,68 @@ const moveDistance = 20
 const width = Dimensions.get('window').width;
 const height = Dimensions.get('window').height;
 
-const NormalBookPager = () => {
+/**
+ * TODO 目前基础功能完成，能够无限滑动，还剩下以下一些功能
+ * 	1. 页码，当前章节下的页码/当前章节的总页数
+ * 	2. 加载数据，当页面滑动之后需要对数据进行加载和移除
+ * 		<1>. 左滑前，已展示 1 展示中 2 待展示 3
+ * 			 左滑开始时，已展示 4 展示中 2 待展示 3 //这个时候应该要检测一下是否还有数据能够填充，将要变成 待展示 的 已展示
+ * 			 左滑结束时，已展示 2 展示中 3 待展示 4
+ * 		<2>. 右滑前，已展示 1 展示中 2 待展示 3
+ * 			 右滑开始时，已展示 1 展示中 2 待展示 0 //这个时候应该要检测一下是否还有数据能够填充，将要变成 已展示 的 待展示
+ * 			 右滑结束时，已展示 0 展示中 1 待展示 2
+ * 		<3>. 根据上面的分析，目前的实现步骤是，通过传入一个数组，在给定一个数组展示中的index，在bookPager内部自己去判断是否
+ * 			 还有能展示的数据，如果没有，加载一个缺省页面，并通过回调通知外部该填充数据了，需要区分的是，告诉外部是往头部还是尾
+ * 			 部填充数据。
+ * 	实现思路：
+ * 	1. 对于传入的数据规定
+ * 		<1>. chapters 格式化之后的章节数据
+ * 	    <2>. chapterIndex 需要展示的章节
+ * 	    <3>. pageIndex 需要展示的页码
+ * 	    <4>. needAddPreDataCallback 告诉外部需要添加头部数据的回调
+ * 	    <5>. needAddNextDataCallback 告诉外部需要添加尾部数据的回调
+ * 	2. 提供给外部的方法
+ * 		<1>. addPreChapters 往头部添加一定数目的章节
+ * 	    <2>. addNextChapters 往尾部添加一定数目的章节
+ * @returns {JSX.Element}
+ * @constructor
+ */
+const NormalBookPager = forwardRef(({
+										chapters,
+										chapterIndex,
+										pageIndex,
+										needAddPreDataCallback,
+										needAddNextDataCallback,
+										fontColor,
+										chapterFontSize,
+										fontSize,
+										paddingLeft,
+										paddingVertical,
+										lineHeight,
+										paragraphHeight
+									}, ref) => {
 
 	const viewData = useRef({
-		slideDirection: '',//left right
-		releaseOver: true,
-		interval: null,
-		elevationLeftCount: 0,
-		elevationRightCount: 0,
-		hidePosition: 0,
-		showingPosition: 1,
+		slideDirection: '',// left right
+		releaseOver: true,// 用来禁止在动画播放完之前操作其余page
+		interval: null,// 播放动画的interval
+		elevationLeftCount: 0,// 左滑之后的page，重置到右边后的elevation/zIndex
+		elevationRightCount: 0,// 右滑前设置page的elevation/zIndex
 	});
 	//获取本地数据
 	const getViewData = () => {
 		return viewData.current
 	}
-
-
-	const circleQueueRef = useRef(new CircleQueue());
+	//循环队列
+	const circleQueueRef = useRef(new CircleQueue({chapters, chapterIndex, pageIndex}));
 	const getCircleQueue = () => {
 		return circleQueueRef.current
 	}
+
 	const getShowing = () => {
 		return getCircleQueue().getShowing()
 	}
 	const getShowingRef = () => {
-		console.log(getShowing().id)
 		return getShowing().ref
 	}
 	const getShowed = () => {
@@ -51,6 +88,7 @@ const NormalBookPager = () => {
 	const SlideOver = (direction) => {
 		switch (direction) {
 			case Direction_Left:
+				//将左移出屏幕的page重置到屏幕中，并且将位置设置为最底部
 				getShowingRef().setNativeProps({
 					style: {
 						left: 0,
@@ -58,19 +96,23 @@ const NormalBookPager = () => {
 						zIndex: getViewData().elevationLeftCount,//兼容ios
 					}
 				})
+				//重置page status
 				getCircleQueue().slideToShowed();
 				break;
 			case Direction_Right:
+				//确保右移的page到了屏幕中
 				getShowedRef().setNativeProps({
 					style: {
 						left: 0
 					}
 				})
+				//重置page status
 				getCircleQueue().slideToShowing();
 				break
 		}
 	}
 
+	//滑动操作
 	const _panResponder = PanResponder.create({
 		// 要求成为响应者：
 		onStartShouldSetPanResponder: (evt, gestureState) => true,
@@ -189,34 +231,56 @@ const NormalBookPager = () => {
 		},
 	});
 
+
 	return (
 		<View {..._panResponder.panHandlers} style={{width, height}}>
 
-			<View
-				ref={ref => getCircleQueue().assignmentShowedRef(ref)}
-				style={[styles.page, {backgroundColor: 'yellow'}]}>
-				<Text>333333333333333333333333333333333333</Text>
-			</View>
+			<NormalNovelPage
+				width={width}
+				height={height}
+				fontColor={fontColor}
+				chapterFontSize={chapterFontSize}
+				fontSize={fontSize}
+				lineHeight={lineHeight}
+				paddingLeft={paddingLeft}
+				paddingVertical={paddingVertical}
+				paragraphHeight={paragraphHeight}
+				backgroundColor={'yellow'}
+				pageData={getCircleQueue().getShowedData()}
+				ref={ref => getCircleQueue().assignmentShowedRef(ref)}/>
 
-			<View
-				ref={ref => getCircleQueue().assignmentWaitShowRef(ref)}
-				style={[styles.page, {backgroundColor: 'pink'}]}>
-				<Text>222222222222222222222222222222222222</Text>
-			</View>
 
-			<View
-				ref={ref => getCircleQueue().assignmentShowingRef(ref)}
-				style={[styles.page, {backgroundColor: 'green'}]}>
-				<Text>111111111111111111111111111111111111</Text>
-			</View>
+			<NormalNovelPage
+				width={width}
+				height={height}
+				fontColor={fontColor}
+				chapterFontSize={chapterFontSize}
+				fontSize={fontSize}
+				lineHeight={lineHeight}
+				paddingLeft={paddingLeft}
+				paddingVertical={paddingVertical}
+				paragraphHeight={paragraphHeight}
+				backgroundColor={'pink'}
+				pageData={getCircleQueue().getWaitShowData()}
+				ref={ref => getCircleQueue().assignmentWaitShowRef(ref)}/>
+
+
+			<NormalNovelPage
+				width={width}
+				height={height}
+				fontColor={fontColor}
+				chapterFontSize={chapterFontSize}
+				fontSize={fontSize}
+				lineHeight={lineHeight}
+				paddingLeft={paddingLeft}
+				paddingVertical={paddingVertical}
+				paragraphHeight={paragraphHeight}
+				backgroundColor={'green'}
+				pageData={getCircleQueue().getShowingData()}
+				ref={ref => getCircleQueue().assignmentShowingRef(ref)}/>
+
 		</View>
 	)
-}
-
-const styles = StyleSheet.create({
-	page: {
-		width, height, position: 'absolute', opacity: 1, alignItems: 'center', justifyContent: 'center',
-	}
 })
 
 export default NormalBookPager

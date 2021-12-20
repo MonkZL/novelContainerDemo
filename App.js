@@ -1007,41 +1007,41 @@ const App = () => {
 			{/*</TouchableOpacity>*/}
 
 
-			<TouchableOpacity
-				style={{
-					position: 'absolute',
-					top: 60,
-					alignSelf: 'center',
-					backgroundColor: 'green'
-				}}
-				onPress={() => novelContainer.current.addPreChapter([...dataPre])}
-				activeOpacity={0.5}>
-				<Text>add pre</Text>
-			</TouchableOpacity>
+			{/*<TouchableOpacity*/}
+			{/*	style={{*/}
+			{/*		position: 'absolute',*/}
+			{/*		top: 60,*/}
+			{/*		alignSelf: 'center',*/}
+			{/*		backgroundColor: 'green'*/}
+			{/*	}}*/}
+			{/*	onPress={() => novelContainer.current.addPreChapter([...dataPre])}*/}
+			{/*	activeOpacity={0.5}>*/}
+			{/*	<Text>add pre</Text>*/}
+			{/*</TouchableOpacity>*/}
 
-			<TouchableOpacity
-				style={{
-					position: 'absolute',
-					top: 80,
-					alignSelf: 'center',
-					backgroundColor: 'green'
-				}}
-				onPress={() => novelContainer.current.replaceChapter([...dataReplace])}
-				activeOpacity={0.5}>
-				<Text>replace</Text>
-			</TouchableOpacity>
+			{/*<TouchableOpacity*/}
+			{/*	style={{*/}
+			{/*		position: 'absolute',*/}
+			{/*		top: 80,*/}
+			{/*		alignSelf: 'center',*/}
+			{/*		backgroundColor: 'green'*/}
+			{/*	}}*/}
+			{/*	onPress={() => novelContainer.current.replaceChapter([...dataReplace])}*/}
+			{/*	activeOpacity={0.5}>*/}
+			{/*	<Text>replace</Text>*/}
+			{/*</TouchableOpacity>*/}
 
-			<TouchableOpacity
-				style={{
-					position: 'absolute',
-					top: 100,
-					alignSelf: 'center',
-					backgroundColor: 'green'
-				}}
-				onPress={() => novelContainer.current.addNextChapter([...dataNext])}
-				activeOpacity={0.5}>
-				<Text>add next</Text>
-			</TouchableOpacity>
+			{/*<TouchableOpacity*/}
+			{/*	style={{*/}
+			{/*		position: 'absolute',*/}
+			{/*		top: 100,*/}
+			{/*		alignSelf: 'center',*/}
+			{/*		backgroundColor: 'green'*/}
+			{/*	}}*/}
+			{/*	onPress={() => novelContainer.current.addNextChapter([...dataNext])}*/}
+			{/*	activeOpacity={0.5}>*/}
+			{/*	<Text>add next</Text>*/}
+			{/*</TouchableOpacity>*/}
 
 			{/*尺子*/}
 			{/*<View style={{width: 10, height: 720, backgroundColor: 'red', top: 0, position: 'absolute'}}/>*/}
