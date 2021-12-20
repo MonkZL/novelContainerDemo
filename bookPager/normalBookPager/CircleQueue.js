@@ -178,4 +178,12 @@ export default class CircleQueue {
 		return this.chapters[waitShowIndex.chapterIndex][waitShowIndex.pageIndex]
 	}
 
+	canSlideToShowed() {
+		return !(this.chapterIndex === this.chapters.length - 1 && this.pageIndex === this.chapters[this.chapterIndex].length - 1)
+	}
+
+	canSlideToShowing() {
+		return !(this.chapterIndex === 0 && this.pageIndex === 0)
+	}
+
 }

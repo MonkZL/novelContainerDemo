@@ -132,10 +132,21 @@ const NormalBookPager = forwardRef(({
 
 			// 最近一次的移动距离为gestureState.move{X,Y}
 			// 从成为响应者开始时的累计手势移动距离为gestureState.d{x,y}
+
 			// 未释放完成 不能操作
 			if (!getViewData().releaseOver) {
 				return
 			}
+
+			//判断不能往左滑动
+			if (getViewData().slideDirection && getViewData().slideDirection === Direction_Left && !getCircleQueue().canSlideToShowed()) {
+				return;
+			}
+			//判断不能往右滑动
+			if (getViewData().slideDirection && getViewData().slideDirection === Direction_Right && !getCircleQueue().canSlideToShowing()) {
+				return;
+			}
+
 			const {x0, moveX} = gestureState;
 			// 水平拖动的距离
 			let moveXDistance = moveX - x0
@@ -170,8 +181,22 @@ const NormalBookPager = forwardRef(({
 			// 用户放开了所有的触摸点，且此时视图已经成为了响应者。
 			// 一般来说这意味着一个手势操作已经成功完成。
 
+			//判断不能往左滑动
+			if (getViewData().slideDirection && getViewData().slideDirection === Direction_Left && !getCircleQueue().canSlideToShowed()) {
+				// 重置方向为空
+				getViewData().slideDirection = ''
+				return;
+			}
+			//判断不能往右滑动
+			if (getViewData().slideDirection && getViewData().slideDirection === Direction_Right && !getCircleQueue().canSlideToShowing()) {
+				// 重置方向为空
+				getViewData().slideDirection = ''
+				return;
+			}
+
 			//将释放状态设置为释放中 防止在释放未完成时 做别的操作
 			getViewData().releaseOver = false;
+
 			const {x0, moveX} = gestureState;
 			// 水平拖动的距离
 			let moveXDistance = moveX - x0
